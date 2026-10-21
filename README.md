@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎓 CAMPUS COPILOT — Your AI Academic Operating System
 
 > **"ChatGPT answers questions. Google finds information. Campus Copilot turns your academic life into an actionable plan."**
@@ -100,3 +101,6 @@ npm run build
 # Start the Node.js production server
 npm start
 ```
+=======
+# CAMPUS_COPILOT
+>>>>>>> ef2bb10a8beeb439c3975f7891b6b4ea27ebaf50
