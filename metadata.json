@@ -1,0 +1,8 @@
+{
+  "name": "Campus Copilot",
+  "description": "Your AI Academic Operating System. Turns syllabus, study material, exams, and progress into actionable study plans and personalized learning loops.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
