@@ -30,6 +30,8 @@ export const StudyPlanView: React.FC = () => {
   } = useApp();
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCustomSubject, setIsCustomSubject] = useState(false);
+  const [customSubjectName, setCustomSubjectName] = useState('');
   const [selectedSubject, setSelectedSubject] = useState(studyPlan.subject || profile.subjects[0]);
   const [examDate, setExamDate] = useState(studyPlan.examDate || '2026-10-20');
   const [availableHours, setAvailableHours] = useState(studyPlan.availableHoursPerDay || profile.dailyStudyHours || 3);
@@ -45,7 +47,8 @@ export const StudyPlanView: React.FC = () => {
   const handleGeneratePlan = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
-    setStatusMessage('Synthesizing syllabus, difficulty, and weak areas with Gemini AI...');
+    const effectiveSubject = isCustomSubject ? (customSubjectName.trim() || 'Custom Subject') : selectedSubject;
+    setStatusMessage(`Synthesizing syllabus & schedule for ${effectiveSubject} with Gemini AI...`);
 
     try {
       const weakTopicsArray = weakFocus
@@ -54,7 +57,7 @@ export const StudyPlanView: React.FC = () => {
         .filter(Boolean);
 
       const planData = await generateStudyPlanAPI({
-        subject: selectedSubject,
+        subject: effectiveSubject,
         examDate,
         availableHoursPerDay: Number(availableHours),
         preparationLevel: prepLevel,
@@ -65,7 +68,7 @@ export const StudyPlanView: React.FC = () => {
       setStudyPlan({
         ...planData,
         id: `plan-${Date.now()}`,
-        subject: selectedSubject,
+        subject: effectiveSubject,
         examDate,
         availableHoursPerDay: Number(availableHours),
         preparationLevel: prepLevel,
@@ -159,18 +162,38 @@ export const StudyPlanView: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Subject</label>
-            <select
-              value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
-            >
-              {profile.subjects.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-medium text-slate-400">Subject</label>
+              <button
+                type="button"
+                onClick={() => setIsCustomSubject(!isCustomSubject)}
+                className="text-[10px] text-blue-400 hover:text-blue-300 underline"
+              >
+                {isCustomSubject ? 'Select Enrolled' : '+ Custom Subject'}
+              </button>
+            </div>
+            {isCustomSubject ? (
+              <input
+                type="text"
+                value={customSubjectName}
+                onChange={(e) => setCustomSubjectName(e.target.value)}
+                placeholder="e.g. Distributed Systems"
+                className="w-full bg-slate-800 border border-blue-500/50 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-400"
+                required={isCustomSubject}
+              />
+            ) : (
+              <select
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+              >
+                {profile.subjects.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div>

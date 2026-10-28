@@ -2,6 +2,8 @@ export type UserRole = 'student' | 'faculty';
 
 export interface StudentProfile {
   name: string;
+  rollNo?: string;
+  dob?: string;
   college: string;
   course: string;
   branch: string;
@@ -16,9 +18,14 @@ export interface FacultyProfile {
   id: string;
   name: string;
   title: string;
+  designation?: string; // e.g. "Head of Department (H.O.D)", "Academic Coordinator & Associate Professor"
+  qualification?: string; // e.g. "Ph.D. in Computer Science (IIT Bombay), M.Tech (Gold Medalist)"
   department: string;
   college: string;
   employeeId: string;
+  contactNumber?: string;
+  email?: string;
+  officeRoom?: string;
   coursesTaught: string[];
   activeClassTests: Array<{
     id: string;
@@ -145,16 +152,26 @@ export interface CampusItem {
   verifiedSource: string;
 }
 
+export interface ChatAttachment {
+  name: string;
+  type: 'image' | 'doc' | 'pdf';
+  size: number;
+  dataUrl?: string;
+  extractedText?: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: string;
+  attachment?: ChatAttachment;
   citations?: string[];
   suggestedActions?: string[];
   provider?: 'gemini' | 'chatgpt';
   model?: string;
   latencyMs?: number;
+  isStreaming?: boolean;
 }
 
 // -------------------------------------------------------------
@@ -308,4 +325,249 @@ export interface AIProviderInfo {
   badgeColor: string;
   description: string;
 }
+
+export type ThemeMode = 'dark' | 'light';
+
+export interface AssignmentItem {
+  id: string;
+  title: string;
+  subject: string;
+  dueDate: string; // YYYY-MM-DD
+  priority: 'High' | 'Medium' | 'Low';
+  description: string;
+  maxMarks: number;
+  completed: boolean;
+  score?: number;
+  fileAttachment?: string;
+  createdAt: string;
+}
+
+export interface SubjectUnit {
+  id: string;
+  unitNumber: number;
+  title: string;
+  topics: string[];
+  completedTopics: string[];
+}
+
+export interface SubjectDetail {
+  id: string;
+  name: string;
+  code: string;
+  instructor?: string;
+  credits: number;
+  units: SubjectUnit[];
+  examDate?: string;
+  readinessScore: number;
+  notesCount: number;
+  pyqCount: number;
+}
+
+export interface ChatConversation {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messages: ChatMessage[];
+  groundingMaterialId?: string; // id of specific material or 'all'
+  mode: 'detailed' | 'short' | 'code';
+}
+
+export interface StudyGoal {
+  id: string;
+  title: string;
+  targetDate: string;
+  progressPercent: number;
+  category: 'Exam Prep' | 'Concept Mastery' | 'Assignment' | 'Weekly Hours';
+  completed: boolean;
+}
+
+export interface DailyActivity {
+  day: string;
+  date: string;
+  minutesSpent: number;
+  tasksCompleted: number;
+  targetMinutes: number;
+}
+
+// -------------------------------------------------------------
+// CAMPUS POLLS & VOTING
+// -------------------------------------------------------------
+export interface PollOption {
+  id: string;
+  text: string;
+  votesCount: number;
+  votes?: number;
+  voterRollNos?: string[];
+}
+
+export interface CampusPoll {
+  id: string;
+  question: string;
+  description?: string;
+  category: 'Academic' | 'Campus Life' | 'Event' | 'Curriculum' | 'General' | 'academic' | 'campus_life' | 'exam' | 'facilities';
+  createdBy: string;
+  creatorRole: string;
+  createdAt: string;
+  expiresAt?: string;
+  endDate?: string;
+  isActive?: boolean;
+  status?: 'active' | 'closed';
+  totalVotes: number;
+  options: PollOption[];
+  allowedVoters?: 'all' | 'students_only' | 'faculty_only';
+  targetAudience?: string;
+  hasVoted?: boolean;
+  userVotedOptionId?: string;
+}
+
+// -------------------------------------------------------------
+// ATTENDANCE & LEAVE NOTICE
+// -------------------------------------------------------------
+export interface SubjectAttendance {
+  subjectId: string;
+  subjectName: string;
+  subjectCode: string;
+  faculty?: string;
+  totalClasses: number;
+  attendedClasses: number;
+  absentClasses: number;
+  percentage: number;
+  status: 'Good' | 'Warning' | 'Critical';
+}
+
+export interface AttendanceRecord {
+  studentRollNo: string;
+  studentName: string;
+  semester: string;
+  totalCollegeDays: number;
+  daysAttended: number;
+  daysAbsent: number;
+  attendedDays?: number;
+  absentDays?: number;
+  overallPercentage: number;
+  subjects: SubjectAttendance[];
+  recentHistory: Array<{
+    date: string;
+    day: string;
+    status: 'Present' | 'Absent' | 'Leave';
+    subjectsMarked: string[];
+  }>;
+}
+
+export interface LeaveNotice {
+  id: string;
+  studentRollNo: string;
+  studentName: string;
+  department?: string;
+  semester?: string;
+  startDate: string;
+  endDate: string;
+  daysCount?: number;
+  reason: string;
+  subject?: string;
+  letterContent?: string;
+  recipientFaculty?: string;
+  category?: 'Medical' | 'Personal' | 'Academic Event' | 'Family Emergency';
+  documentProof?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  facultyRemarks?: string;
+  reviewedBy?: string;
+  createdAt: string;
+}
+
+// -------------------------------------------------------------
+// GRIEVANCE REDRESSAL
+// -------------------------------------------------------------
+export interface GrievanceTicket {
+  id: string;
+  ticketNumber?: string;
+  studentRollNo?: string;
+  studentName?: string;
+  isAnonymous: boolean;
+  category: 'Academics' | 'Hostel & Mess' | 'Library' | 'Examinations' | 'Infrastructure' | 'Faculty/Staff' | 'Anti-Ragging' | 'Other' | 'academic' | 'infrastructure' | 'hostel' | 'library' | 'examination' | 'harassment' | 'other';
+  subject: string;
+  description: string;
+  priority: 'Low' | 'Medium' | 'High' | 'Urgent' | 'low' | 'medium' | 'high' | 'urgent';
+  status: 'submitted' | 'under_review' | 'action_taken' | 'resolved';
+  createdAt: string;
+  submittedDate?: string;
+  actionRemarks?: string;
+  resolutionNotes?: string;
+  assignedTo?: string;
+}
+
+// -------------------------------------------------------------
+// ONLINE CLASS TESTS
+// -------------------------------------------------------------
+export interface ClassTestQuestion {
+  id: string;
+  questionText?: string;
+  text?: string;
+  type: 'mcq' | 'subjective';
+  options?: string[];
+  correctOption?: number;
+  correctAnswer?: string;
+  sampleAnswer?: string;
+  marks: number;
+  rubricOrHint?: string;
+}
+
+export interface OnlineClassTest {
+  id: string;
+  title: string;
+  subject: string;
+  subjectCode?: string;
+  scheduledFor?: string;
+  deadline?: string;
+  endDate?: string;
+  durationMinutes: number;
+  totalMarks: number;
+  passingMarks?: number;
+  createdBy: string;
+  status: 'upcoming' | 'live' | 'closed' | 'active';
+  instructions?: string;
+  questions: ClassTestQuestion[];
+  submissionsCount?: number;
+}
+
+export interface TestSubmission {
+  id: string;
+  testId: string;
+  studentRollNo: string;
+  studentName: string;
+  submittedAt: string;
+  answers: Record<string, string | number>;
+  mcqScore?: number;
+  subjectiveScore?: number;
+  totalScore?: number;
+  score?: number;
+  totalMarks?: number;
+  maxScore?: number;
+  passed?: boolean;
+  status?: 'evaluated' | 'pending_evaluation';
+  feedback?: string;
+  facultyFeedback?: string;
+}
+
+// -------------------------------------------------------------
+// DEPARTMENT FACULTY DIRECTORY
+// -------------------------------------------------------------
+export interface FacultyMember {
+  id: string;
+  name: string;
+  designation: string; // e.g. "Head of Department (H.O.D) & Professor", "Academic Coordinator & Associate Professor"
+  department: string;
+  qualification: string;
+  specialization: string | string[];
+  email: string;
+  contactNumber: string;
+  officeRoom: string;
+  experienceYears?: number;
+  courses: string[];
+  photoUrl: string;
+  cabinHours?: string;
+  officeHours?: string;
+}
+
 

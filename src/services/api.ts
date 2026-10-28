@@ -79,6 +79,7 @@ export async function sendChatMessageAPI(params: {
   currentSubject?: string;
   provider?: 'gemini' | 'chatgpt';
   model?: string;
+  attachment?: any;
 }) {
   const res = await fetch('/api/ai/chat', {
     method: 'POST',
@@ -89,6 +90,86 @@ export async function sendChatMessageAPI(params: {
     throw new Error('Chat API call failed');
   }
   return await res.json();
+}
+
+export async function streamChatMessageAPI(
+  params: {
+    messages: { role: string; content: string }[];
+    studentContext?: any;
+    currentSubject?: string;
+    provider?: 'gemini' | 'chatgpt';
+    model?: string;
+    attachment?: any;
+  },
+  callbacks: {
+    onChunk: (chunk: string) => void;
+    onComplete: (data: { model?: string; provider?: string; latencyMs?: number; suggestedActions?: string[] }) => void;
+    onError: (err: any) => void;
+  },
+  signal?: AbortSignal
+) {
+  try {
+    const res = await fetch('/api/ai/chat-stream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+      },
+      body: JSON.stringify(params),
+      signal,
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}`);
+    }
+
+    if (!res.body) {
+      throw new Error('ReadableStream not supported on this response');
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || !trimmed.startsWith('data:')) continue;
+        const dataStr = trimmed.slice(5).trim();
+        if (dataStr === '[DONE]') continue;
+
+        try {
+          const parsed = JSON.parse(dataStr);
+          if (parsed.error) {
+            throw new Error(parsed.error);
+          }
+          if (parsed.chunk) {
+            callbacks.onChunk(parsed.chunk);
+          }
+          if (parsed.done) {
+            callbacks.onComplete({
+              model: parsed.model,
+              provider: parsed.provider,
+              latencyMs: parsed.latencyMs,
+              suggestedActions: parsed.suggestedActions,
+            });
+          }
+        } catch (jsonErr: any) {
+          // If non-JSON text or internal chunk, ignore malformed event
+        }
+      }
+    }
+  } catch (err: any) {
+    if (signal?.aborted) return;
+    callbacks.onError(err);
+  }
 }
 
 export async function fetchAIProvidersAPI() {
@@ -345,4 +426,126 @@ export async function extractTextFromFile(file: File): Promise<string> {
       reader.readAsText(file);
     }
   });
+}
+
+// -------------------------------------------------------------
+// NEW ASSIGNMENTS, EXAMS & REVISION NOTES APIS
+// -------------------------------------------------------------
+
+export async function fetchAssignmentsTrackerAPI(filters: { subject?: string; status?: string; priority?: string } = {}) {
+  const params = new URLSearchParams();
+  if (filters.subject) params.append('subject', filters.subject);
+  if (filters.status) params.append('status', filters.status);
+  if (filters.priority) params.append('priority', filters.priority);
+  const res = await fetch(`/api/assignments?${params.toString()}`);
+  if (!res.ok) throw new Error('Failed to fetch assignments');
+  const data = await res.json();
+  return data.assignments;
+}
+
+export async function createAssignmentAPI(payload: {
+  title: string;
+  subject: string;
+  dueDate: string;
+  priority?: string;
+  description?: string;
+  maxMarks?: number;
+}) {
+  const res = await fetch('/api/assignments', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error('Failed to create assignment');
+  const data = await res.json();
+  return data.assignment;
+}
+
+export async function toggleAssignmentAPI(id: string) {
+  const res = await fetch(`/api/assignments/${id}/toggle`, { method: 'PATCH' });
+  if (!res.ok) throw new Error('Failed to toggle assignment');
+  const data = await res.json();
+  return data.assignment;
+}
+
+export async function deleteAssignmentAPI(id: string) {
+  const res = await fetch(`/api/assignments/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete assignment');
+  return await res.json();
+}
+
+export async function fetchExamsAPI() {
+  const res = await fetch('/api/exams');
+  if (!res.ok) throw new Error('Failed to fetch exams');
+  const data = await res.json();
+  return data.exams;
+}
+
+export async function createExamAPI(payload: {
+  subject: string;
+  date: string;
+  topicsCovered?: number;
+  totalTopics?: number;
+  readinessPercentage?: number;
+}) {
+  const res = await fetch('/api/exams', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error('Failed to create exam');
+  const data = await res.json();
+  return data.exam;
+}
+
+export async function deleteExamAPI(id: string) {
+  const res = await fetch(`/api/exams/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete exam');
+  return await res.json();
+}
+
+export async function fetchConversationsAPI() {
+  const res = await fetch('/api/conversations');
+  if (!res.ok) throw new Error('Failed to fetch conversations');
+  const data = await res.json();
+  return data.conversations;
+}
+
+export async function saveConversationAPI(conversation: any) {
+  const res = await fetch('/api/conversations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(conversation),
+  });
+  if (!res.ok) throw new Error('Failed to save conversation');
+  const data = await res.json();
+  return data.conversation;
+}
+
+export async function deleteConversationAPI(id: string) {
+  const res = await fetch(`/api/conversations/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete conversation');
+  return await res.json();
+}
+
+export async function generateRevisionNotesAPI(params: {
+  subject: string;
+  topic?: string;
+  materialText?: string;
+}) {
+  const res = await fetch('/api/ai/generate-revision-notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) throw new Error('Failed to generate revision notes');
+  const data = await res.json();
+  return data.notes;
+}
+
+export async function fetchWeeklyActivityAPI() {
+  const res = await fetch('/api/activity/weekly');
+  if (!res.ok) throw new Error('Failed to fetch weekly activity');
+  const data = await res.json();
+  return data.activity;
 }

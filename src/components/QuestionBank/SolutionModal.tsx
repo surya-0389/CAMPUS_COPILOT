@@ -13,8 +13,11 @@ import {
   BookmarkCheck,
   RotateCw,
   Copy,
+  BrainCircuit,
 } from 'lucide-react';
 import { fetchQuestionSolutionAPI, generateQuestionSolutionAPI, saveQuestionAPI, removeSavedQuestionAPI } from '../../services/api';
+import { useApp } from '../../context/AppContext';
+import { cleanAcademicSymbols } from '../AIChatView';
 
 interface SolutionModalProps {
   question: QuestionBankItem | null;
@@ -27,6 +30,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({
   onClose,
   onBookmarkToggle,
 }) => {
+  const { openAIChatWithQuery } = useApp();
   const [solution, setSolution] = useState<QuestionSolution | null>(null);
   const [loading, setLoading] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
@@ -193,6 +197,21 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({
             >
               <Copy className="w-3.5 h-3.5" />
               <span>{copied ? 'Copied!' : 'Copy Solution'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onClose();
+                openAIChatWithQuery(
+                  `I am studying this university problem from the question bank:\n\n"${question.question_text}"\n\nPlease break down the concept step-by-step and provide exam revision tips.`,
+                  question.question_text
+                );
+              }}
+              className="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-600/20"
+              title="Discuss directly in AI Chat"
+            >
+              <BrainCircuit className="w-3.5 h-3.5 text-blue-200" />
+              <span>Discuss with AI</span>
             </button>
 
             <button

@@ -23,6 +23,7 @@ import {
   removeSavedQuestionAPI,
   extractQuestionsAPI,
 } from '../../services/api';
+import { useApp } from '../../context/AppContext';
 
 interface PaperDetailViewProps {
   paperId: string;
@@ -37,6 +38,7 @@ export const PaperDetailView: React.FC<PaperDetailViewProps> = ({
   onOpenSolution,
   onStartPractice,
 }) => {
+  const { openAIChatWithQuery } = useApp();
   const [paper, setPaper] = useState<QuestionPaper | null>(null);
   const [questions, setQuestions] = useState<QuestionBankItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -287,19 +289,35 @@ export const PaperDetailView: React.FC<PaperDetailViewProps> = ({
                 )}
 
                 {/* Footer Solution Trigger */}
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                <div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
                   <span className="text-[11px] text-slate-500 flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                     Verified Examination Question
                   </span>
 
-                  <button
-                    onClick={() => onOpenSolution(q)}
-                    className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>View Step-by-Step Solution</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() =>
+                        openAIChatWithQuery(
+                          `I have a question about this PYQ from ${paper?.title || 'Question Bank'}:\n\n"${q.question_text}"\n\nPlease break down the concept step-by-step and show the complete solution.`,
+                          q.question_text,
+                          paper?.subject_id
+                        )
+                      }
+                      className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <BrainCircuit className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Discuss with AI</span>
+                    </button>
+
+                    <button
+                      onClick={() => onOpenSolution(q)}
+                      className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>View Solution</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

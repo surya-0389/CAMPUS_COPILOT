@@ -14,11 +14,18 @@ import {
   Send,
   AlertCircle,
   FileCheck,
+  Plus,
 } from 'lucide-react';
 import { queryCampusAPI } from '../services/api';
 
 export const CampusView: React.FC = () => {
-  const { campusItems, profile } = useApp();
+  const { campusItems, profile, userRole, facultyProfile, addCampusNotice, showCelebration } = useApp();
+
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [newNoticeTitle, setNewNoticeTitle] = useState('');
+  const [newNoticeCategory, setNewNoticeCategory] = useState<CampusItem['category']>('notice');
+  const [newNoticeContent, setNewNoticeContent] = useState('');
+  const [newNoticeDept, setNewNoticeDept] = useState('Computer Science & Engineering');
 
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -97,6 +104,16 @@ export const CampusView: React.FC = () => {
             Official records for {profile.college}. AI strictly cites sources and refuses to speculate on unverified campus queries.
           </p>
         </div>
+
+        {userRole === 'faculty' && (
+          <button
+            onClick={() => setIsUploadModalOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md shadow-purple-600/25 transition cursor-pointer self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Upload Notice / Timetable</span>
+          </button>
+        )}
       </div>
 
       {/* AI Grounded Campus Search Bar */}
@@ -232,6 +249,113 @@ export const CampusView: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Faculty Upload Notice Modal */}
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-6 shadow-2xl animate-fade-in space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <Bell className="w-5 h-5 text-purple-400" />
+                Broadcast Notice, Routine &amp; Timetable
+              </h2>
+              <button
+                onClick={() => setIsUploadModalOpen(false)}
+                className="text-slate-400 hover:text-white text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newNoticeTitle.trim() || !newNoticeContent.trim()) return;
+
+                addCampusNotice({
+                  title: newNoticeTitle.trim(),
+                  category: newNoticeCategory,
+                  content: newNoticeContent.trim(),
+                  department: newNoticeDept,
+                  verifiedSource: `Published by ${facultyProfile.name} (${facultyProfile.designation})`,
+                });
+
+                setNewNoticeTitle('');
+                setNewNoticeContent('');
+                setIsUploadModalOpen(false);
+                showCelebration();
+              }}
+              className="space-y-3.5 text-xs"
+            >
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Notice Category</label>
+                  <select
+                    value={newNoticeCategory}
+                    onChange={(e) => setNewNoticeCategory(e.target.value as any)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                  >
+                    <option value="notice">Official Notice / Circular</option>
+                    <option value="class_timetable">Class Routine &amp; Timetable</option>
+                    <option value="exam_timetable">Exam Schedule &amp; Seating</option>
+                    <option value="library">Library Hours &amp; Access</option>
+                    <option value="department">Department Message</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Department</label>
+                  <input
+                    type="text"
+                    value={newNoticeDept}
+                    onChange={(e) => setNewNoticeDept(e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Notice Title</label>
+                <input
+                  type="text"
+                  required
+                  value={newNoticeTitle}
+                  onChange={(e) => setNewNoticeTitle(e.target.value)}
+                  placeholder="e.g. Revised Class Routine for CSE Semester 3 (Monday to Friday)"
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Full Content / Schedule Details</label>
+                <textarea
+                  rows={5}
+                  required
+                  value={newNoticeContent}
+                  onChange={(e) => setNewNoticeContent(e.target.value)}
+                  placeholder="Paste timings, subject slot breakdown, room allocations, rules or circular details..."
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white placeholder-slate-500 font-mono text-xs focus:outline-none focus:border-purple-500 leading-relaxed"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsUploadModalOpen(false)}
+                  className="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold transition shadow-md shadow-purple-600/30"
+                >
+                  Publish to Campus Directory
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

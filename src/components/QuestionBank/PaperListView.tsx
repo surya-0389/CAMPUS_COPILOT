@@ -16,6 +16,7 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { fetchQuestionPapersAPI } from '../../services/api';
+import { useApp } from '../../context/AppContext';
 
 interface PaperListViewProps {
   initialCategory?: ExamCategory;
@@ -32,6 +33,7 @@ export const PaperListView: React.FC<PaperListViewProps> = ({
   onSelectPaper,
   onOpenUpload,
 }) => {
+  const { userRole } = useApp();
   const [papers, setPapers] = useState<QuestionPaper[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -104,13 +106,20 @@ export const PaperListView: React.FC<PaperListViewProps> = ({
           })}
         </div>
 
-        <button
-          onClick={() => onOpenUpload(activeCategory === 'all' ? 'pyq' : (activeCategory as ExamCategory))}
-          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-blue-600/20 cursor-pointer shrink-0"
-        >
-          <Upload className="w-3.5 h-3.5" />
-          <span>Upload Paper</span>
-        </button>
+        {userRole === 'faculty' ? (
+          <button
+            onClick={() => onOpenUpload(activeCategory === 'all' ? 'pyq' : (activeCategory as ExamCategory))}
+            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-purple-600/20 cursor-pointer shrink-0"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span>Upload Paper</span>
+          </button>
+        ) : (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-400 shrink-0">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Faculty Verified Question Repository</span>
+          </div>
+        )}
       </div>
 
       {/* Filter Bar */}

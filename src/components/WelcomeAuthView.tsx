@@ -25,8 +25,6 @@ export const WelcomeAuthView: React.FC = () => {
   const {
     loginAs,
     setIsDemoModalOpen,
-    setIsDocsModalOpen,
-    setIsExportModalOpen,
     selectedProvider,
     setSelectedProvider,
   } = useApp();
@@ -97,227 +95,206 @@ export const WelcomeAuthView: React.FC = () => {
 
       {/* Role Selection Container */}
       <div className="w-full max-w-4xl space-y-6">
-        {/* Toggle Mode: 1-Click Persona vs Custom Login */}
+        {/* Toggle Mode: Student Login vs Faculty Login */}
         <div className="flex items-center justify-center gap-2">
-          <div className="p-1 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center text-xs font-semibold">
+          <div className="p-1 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center text-xs font-semibold shadow-lg">
             <button
-              onClick={() => setActiveTab('quick')}
-              className={`px-4 py-1.5 rounded-xl transition cursor-pointer ${
-                activeTab === 'quick' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              onClick={() => setSelectedRole('student')}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition cursor-pointer ${
+                selectedRole === 'student'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
-              ⚡ Instant 1-Click Role Login
+              <User className="w-4 h-4" />
+              <span>Student Portal Login</span>
             </button>
             <button
-              onClick={() => setActiveTab('credentials')}
-              className={`px-4 py-1.5 rounded-xl transition cursor-pointer ${
-                activeTab === 'credentials' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              onClick={() => setSelectedRole('faculty')}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition cursor-pointer ${
+                selectedRole === 'faculty'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/25'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
-              🔑 Custom Sign-In Form
+              <Users className="w-4 h-4" />
+              <span>Faculty &amp; H.O.D Portal Login</span>
             </button>
           </div>
         </div>
 
-        {/* 1. Quick Persona Selection Cards */}
-        {activeTab === 'quick' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Student Persona Card */}
-            <div className="relative group rounded-3xl bg-slate-900/80 backdrop-blur-xl border-2 border-slate-800 hover:border-blue-500/60 p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-blue-500/20">
-              <div className="absolute top-4 right-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-full">
-                  Primary Flow
-                </span>
+        {/* Dynamic Login Box */}
+        {selectedRole === 'student' ? (
+          <div className="max-w-xl mx-auto p-6 sm:p-8 rounded-3xl bg-slate-900/90 backdrop-blur-xl border border-blue-500/30 shadow-2xl shadow-blue-500/10 space-y-5 animate-fade-in">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] font-bold uppercase tracking-wider mb-2">
+                  Student Verification Portal
+                </div>
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <span>Student Sign-In</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Enter your University Roll Number, Date of Birth, and Full Name to access attendance, PYQ bank, study plans, and live class tests.
+                </p>
               </div>
-
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition duration-300">
-                  <User className="w-6 h-6" />
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition">
-                    Login as Student
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Experience Alex&apos;s adaptive learning loop &amp; exam preparation
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1.5 text-xs text-slate-300">
-                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-400">
-                    <span>STUDENT PROFILE</span>
-                    <span className="text-blue-400">3rd Semester B.Tech</span>
-                  </div>
-                  <p className="font-semibold text-white">Alex • Computer Science &amp; Engineering</p>
-                  <p className="text-[11px] text-amber-400 font-medium flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    Target: DBMS Final Exam in 4 Days
-                  </p>
-                </div>
-
-                <div className="space-y-2 text-xs text-slate-300">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Upload Syllabus &amp; Notes (PDF / Text parser)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>AI Study Plan tailored to 3 hrs/day budget</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>40% Weak Topic Diagnosis &amp; Remediation Loop</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>University PYQ Bank with Step-by-Step AI Proofs</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-6 mt-6 border-t border-slate-800">
-                <button
-                  onClick={() => loginAs('student')}
-                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 transition-all duration-200 cursor-pointer active:scale-98"
-                >
-                  <span>Enter Student Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
+                <GraduationCap className="w-6 h-6" />
               </div>
             </div>
 
-            {/* Faculty Persona Card */}
-            <div className="relative group rounded-3xl bg-slate-900/80 backdrop-blur-xl border-2 border-slate-800 hover:border-purple-500/60 p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-purple-500/20">
-              <div className="absolute top-4 right-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-1 rounded-full">
-                  Faculty Portal
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center group-hover:scale-110 transition duration-300">
-                  <Users className="w-6 h-6" />
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition">
-                    Login as Faculty Member
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Professor &amp; Departmental exam coordinator controls
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-1.5 text-xs text-slate-300">
-                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-400">
-                    <span>FACULTY PROFILE</span>
-                    <span className="text-purple-400">HOD Computer Science</span>
-                  </div>
-                  <p className="font-semibold text-white">Dr. Robert Vance • Professor</p>
-                  <p className="text-[11px] text-emerald-400 font-medium flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    14 Verified Papers &amp; 3 Active Class Tests
-                  </p>
-                </div>
-
-                <div className="space-y-2 text-xs text-slate-300">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Upload PYQs, Class Tests 1/2 &amp; Marking Schemes</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Class Weakness Diagnostics (Normalization: 42%)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Post Verified Campus Notices &amp; Exam Timetables</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>AI Question Paper Extractor &amp; Solution Approver</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-6 mt-6 border-t border-slate-800">
-                <button
-                  onClick={() => loginAs('faculty')}
-                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-600/25 transition-all duration-200 cursor-pointer active:scale-98"
-                >
-                  <span>Enter Faculty Portal</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* 2. Custom Sign-In Form */
-          <div className="max-w-md mx-auto p-6 sm:p-8 rounded-3xl bg-slate-900/90 backdrop-blur-xl border border-slate-800 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-white text-center">Institutional Single Sign-On</h3>
-            <p className="text-xs text-slate-400 text-center">
-              Sign in with your campus identity or university credentials
-            </p>
-
-            <form onSubmit={handleCustomLogin} className="space-y-4 pt-2">
-              <div className="space-y-1 text-xs">
-                <label className="text-slate-300 font-semibold">Select Role:</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole('student')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                      selectedRole === 'student'
-                        ? 'bg-blue-600 border-blue-500 text-white'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <User className="w-3.5 h-3.5" />
-                    <span>Student</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole('faculty')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                      selectedRole === 'faculty'
-                        ? 'bg-purple-600 border-purple-500 text-white'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Users className="w-3.5 h-3.5" />
-                    <span>Faculty</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-1 text-xs">
-                <label className="text-slate-300 font-semibold">Full Name:</label>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                loginAs('student');
+              }}
+              className="space-y-4 pt-1"
+            >
+              <div className="space-y-1.5 text-xs">
+                <label className="text-slate-300 font-semibold flex items-center justify-between">
+                  <span>Full Name</span>
+                  <span className="text-slate-500 text-[10px]">As per University Admit Card</span>
+                </label>
                 <input
                   type="text"
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  placeholder={selectedRole === 'student' ? 'e.g. Alex Sharma' : 'e.g. Dr. Robert Vance'}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  required
+                  defaultValue="Aarav Sharma"
+                  placeholder="e.g. Aarav Sharma"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
                 />
               </div>
 
-              <div className="space-y-1 text-xs">
-                <label className="text-slate-300 font-semibold">Institution / University:</label>
-                <input
-                  type="text"
-                  value={customCollege}
-                  onChange={(e) => setCustomCollege(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5 text-xs">
+                  <label className="text-slate-300 font-semibold flex items-center justify-between">
+                    <span>Roll Number / ID</span>
+                    <span className="text-blue-400 text-[10px]">Required</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    defaultValue="2024CS104"
+                    placeholder="e.g. 2024CS104"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono transition"
+                  />
+                </div>
+
+                <div className="space-y-1.5 text-xs">
+                  <label className="text-slate-300 font-semibold flex items-center justify-between">
+                    <span>Date of Birth (DOB)</span>
+                    <span className="text-blue-400 text-[10px]">YYYY-MM-DD</span>
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    defaultValue="2004-05-14"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                <p className="text-slate-300 font-medium">📋 Enrolled Program &amp; Institute:</p>
+                <p>B.Tech Computer Science &amp; Engineering • 3rd Semester • Apex Institute of Science &amp; Technology</p>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm transition cursor-pointer shadow-md shadow-blue-600/20 mt-2"
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all duration-200 cursor-pointer active:scale-98"
               >
-                Sign In as {selectedRole === 'student' ? 'Student' : 'Faculty Member'}
+                <span>Login to Student Dashboard</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
+
+              <div className="pt-1 text-center">
+                <button
+                  type="button"
+                  onClick={() => loginAs('student')}
+                  className="text-xs text-blue-400 hover:text-blue-300 underline font-medium cursor-pointer"
+                >
+                  ⚡ Fast One-Click Demo Access as Aarav Sharma (2024CS104)
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <div className="max-w-xl mx-auto p-6 sm:p-8 rounded-3xl bg-slate-900/90 backdrop-blur-xl border border-purple-500/30 shadow-2xl shadow-purple-500/10 space-y-5 animate-fade-in">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[11px] font-bold uppercase tracking-wider mb-2">
+                  Academic Faculty &amp; H.O.D Portal
+                </div>
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <span>Faculty Sign-In</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Authenticate using your Faculty Employee ID and departmental password.
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                loginAs('faculty');
+              }}
+              className="space-y-4 pt-1"
+            >
+              <div className="space-y-1.5 text-xs">
+                <label className="text-slate-300 font-semibold flex items-center justify-between">
+                  <span>Faculty Employee ID</span>
+                  <span className="text-purple-400 text-[10px]">Format: FAC-DEPT-XXX</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  defaultValue="FAC-CSE-094"
+                  placeholder="e.g. FAC-CSE-094"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-mono transition"
+                />
+              </div>
+
+              <div className="space-y-1.5 text-xs">
+                <label className="text-slate-300 font-semibold flex items-center justify-between">
+                  <span>Password</span>
+                  <span className="text-slate-500 text-[10px]">Institutional Key</span>
+                </label>
+                <input
+                  type="password"
+                  required
+                  defaultValue="faculty@campus2026"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                <p className="text-purple-300 font-semibold flex items-center gap-1.5">
+                  <Award className="w-3.5 h-3.5" />
+                  Dr. Robert Vance • Head of Department (H.O.D) &amp; Senior Professor
+                </p>
+                <p>Ph.D. in Computer Science (IIT Delhi) • Cabin: Block B-304 • CSE Dept</p>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition-all duration-200 cursor-pointer active:scale-98"
+              >
+                <span>Login to Faculty Portal</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <div className="pt-1 text-center">
+                <button
+                  type="button"
+                  onClick={() => loginAs('faculty')}
+                  className="text-xs text-purple-400 hover:text-purple-300 underline font-medium cursor-pointer"
+                >
+                  ⚡ Fast One-Click Demo Access as Dr. Robert Vance (H.O.D)
+                </button>
+              </div>
             </form>
           </div>
         )}
@@ -335,15 +312,7 @@ export const WelcomeAuthView: React.FC = () => {
               className="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer transition"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Launch 2-Min Guided Demo Walkthrough</span>
-            </button>
-            <span>•</span>
-            <button
-              onClick={() => setIsDocsModalOpen(true)}
-              className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 cursor-pointer transition"
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>Docs &amp; Architecture</span>
+              <span>Launch Guided Demo Walkthrough</span>
             </button>
           </div>
         </div>

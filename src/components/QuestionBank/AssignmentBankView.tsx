@@ -14,14 +14,17 @@ import {
   Square,
   ArrowRight,
   ShieldAlert,
+  BrainCircuit,
 } from 'lucide-react';
 import { fetchAssignmentsAPI, fetchAssignmentDetailAPI } from '../../services/api';
+import { useApp } from '../../context/AppContext';
 
 interface AssignmentBankViewProps {
   onOpenSolution: (question: QuestionBankItem) => void;
 }
 
 export const AssignmentBankView: React.FC<AssignmentBankViewProps> = ({ onOpenSolution }) => {
+  const { openAIChatWithQuery } = useApp();
   const [assignments, setAssignments] = useState<QuestionAssignment[]>([]);
   const [selectedAssignment, setSelectedAssignment] = useState<QuestionAssignment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -202,7 +205,19 @@ export const AssignmentBankView: React.FC<AssignmentBankViewProps> = ({ onOpenSo
                 <p className="text-xs sm:text-sm text-slate-200">
                   Given universal schema R(A, B, C, D, E, F) with F = &#123;A -&gt; BC, C -&gt; DE, E -&gt; F, F -&gt; A&#125;. Determine the highest normal form of R and decompose it into BCNF relations that preserve lossless join.
                 </p>
-                <div className="pt-2 flex items-center justify-end">
+                <div className="pt-2 flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    onClick={() =>
+                      openAIChatWithQuery(
+                        `I am working on this university assignment problem for ${selectedAssignment.subject_id}:\n\n"Given universal schema R(A, B, C, D, E, F) with F = {A -> BC, C -> DE, E -> F, F -> A}. Determine highest normal form and decompose into BCNF."\n\nPlease help me analyze the candidate keys, normal forms, and lossless join decomposition.`
+                      )
+                    }
+                    className="px-3 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <BrainCircuit className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Discuss with AI</span>
+                  </button>
+
                   <button
                     onClick={() =>
                       onOpenSolution({
@@ -238,7 +253,19 @@ export const AssignmentBankView: React.FC<AssignmentBankViewProps> = ({ onOpenSo
                 <p className="text-xs sm:text-sm text-slate-200">
                   Prove whether the decomposition of R(Student, Course, Instructor) into R1(Instructor, Course) and R2(Student, Instructor) preserves the dependency &#123;Student, Course&#125; -&gt; Instructor.
                 </p>
-                <div className="pt-2 flex items-center justify-end">
+                <div className="pt-2 flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    onClick={() =>
+                      openAIChatWithQuery(
+                        `I am working on this university assignment problem for ${selectedAssignment.subject_id}:\n\n"Prove whether the decomposition of R(Student, Course, Instructor) into R1(Instructor, Course) and R2(Student, Instructor) preserves {Student, Course} -> Instructor."\n\nPlease explain dependency preservation testing step-by-step.`
+                      )
+                    }
+                    className="px-3 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-bold text-xs transition flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <BrainCircuit className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Discuss with AI</span>
+                  </button>
+
                   <button
                     onClick={() =>
                       onOpenSolution({
